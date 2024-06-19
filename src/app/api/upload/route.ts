@@ -41,10 +41,8 @@ const uploadFileToS3 = async (
   }
 };
 
-// New way to disable bodyParser in the API route
-export const GET = async (req: NextRequest) => {
-  return NextResponse.json({ message: "Use POST to upload files" });
-};
+export const runtime = "experimental-edge";
+export const preferredRegion = "mumbai";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -82,7 +80,7 @@ export async function POST(req: NextRequest) {
     const document = await prisma.document.create({
       data: {
         name: name ?? "",
-        key: fileKey,
+        key: fileKey, // Store the S3 object key
         type: type ?? "",
         category: category ?? DocumentCategory.NOTES,
         subject: subject ?? "",
@@ -104,11 +102,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "50mb",
-    },
-  },
-};
