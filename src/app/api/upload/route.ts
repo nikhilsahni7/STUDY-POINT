@@ -41,11 +41,11 @@ const uploadFileToS3 = async (
   }
 };
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
