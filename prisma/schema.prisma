@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  collegeName   String?
+  currentSemester Int?
+  username      String?   @unique
+  branch         String?
+  course        String?
+  accounts      Account[]
+  sessions      Session[]
+  documents     Document[]
+  contactus     ContactUs[]
+  feedback      Feedback[]
+  discussions   Discussion[]
+  replies       Reply[]
+  likes         Like[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Document {
+  id          String @id @default(cuid())
+  name        String @unique
+  key         String @unique
+  type        String
+  category    DocumentCategory
+  subject     String
+  year        Int?
+  description String?
+  createdAt   DateTime @default(now())
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([name], name: "idx_document_name")
+  @@index([subject], name: "idx_document_subject")
+  @@index([description], name: "idx_document_description")
+}
+
+enum DocumentCategory {
+  PYQ
+  NOTES
+  SYLLABUS
+}
+
+model ContactUs {
+  id               String   @id @default(cuid())
+  name             String
+  email            String
+  PhoneNumber      String
+  MessageSubject   String?
+  message          String
+  createdAt        DateTime @default(now())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, email, PhoneNumber])
+}
+
+model Feedback {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  rating       Int   // Rating from 1 to 5
+  comment      String?
+  suggestions  String
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@unique([email, rating, comment, suggestions])
+}
+
+model Discussion {
+  id          String    @id @default(cuid())
+  title       String
+  question    String
+  createdAt   DateTime  @default(now())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replies     Reply[]
+  likes       Like[]
+}
+
+model Reply {
+  id          String    @id @default(cuid())
+  answer      String
+  createdAt   DateTime  @default(now())
+  userId      String
+  discussionId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discussion  Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  likes       Like[]
+}
+
+model Like {
+  id          String    @id @default(cuid())
+  userId      String
+  discussionId String?   // For likes on discussions
+  replyId     String?   // For likes on replies
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discussion  Discussion? @relation(fields: [discussionId], references: [id])
+  reply       Reply?    @relation(fields: [replyId], references: [id])
+
+  @@unique([userId, discussionId])
+  @@unique([userId, replyId])
+}
