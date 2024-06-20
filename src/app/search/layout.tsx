@@ -6,7 +6,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div>
       <AppBar />
-      <header className="bg-gray-bg sticky top-0 z-40 p-4">
+      <header className="bg-gray-bg sticky top-0 z-40 p-4 flex">
         <SearchBar />
       </header>
       <main>{children}</main>
