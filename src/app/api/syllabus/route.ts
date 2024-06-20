@@ -4,11 +4,9 @@ import mime from "mime";
 
 const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN_NAME;
 
-export const runtime = "edge";
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const subject = searchParams.get("subject");
+    const subject = req.nextUrl.searchParams.get("subject"); // Use req.nextUrl.searchParams
 
     if (!subject) {
       return NextResponse.json(
