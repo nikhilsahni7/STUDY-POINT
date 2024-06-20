@@ -41,9 +41,6 @@ const uploadFileToS3 = async (
   }
 };
 
-export const runtime = "experimental-edge";
-export const preferredRegion = "mumbai";
-
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const file = form.get("file") as File;

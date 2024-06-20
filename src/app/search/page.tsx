@@ -1,11 +1,10 @@
-// app/search/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 
-const SearchPage = () => {
+const SearchResults = () => {
   const [results, setResults] = useState([]);
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
@@ -25,8 +24,12 @@ const SearchPage = () => {
     fetchResults();
   }, [query]);
 
+  if (!query) {
+    return <p className="text-gray-500">No search query provided</p>;
+  }
+
   return (
-    <div className="container mx-auto p-4">
+    <div>
       <h1 className="text-2xl font-bold mb-4">Search Results for: {query}</h1>
       {results.length > 0 ? (
         <ul className="space-y-4">
@@ -50,6 +53,16 @@ const SearchPage = () => {
       ) : (
         <p className="text-gray-500">No results found</p>
       )}
+    </div>
+  );
+};
+
+const SearchPage = () => {
+  return (
+    <div className="container mx-auto p-4">
+      <Suspense fallback={<p>Loading...</p>}>
+        <SearchResults />
+      </Suspense>
     </div>
   );
 };
