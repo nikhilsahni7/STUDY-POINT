@@ -84,6 +84,8 @@ model Document {
   @@index([name], name: "idx_document_name")
   @@index([subject], name: "idx_document_subject")
   @@index([description], name: "idx_document_description")
+  @@index ([type], name: "idx_document_type")
+  @@index ([category], name: "id x document category") 
 }
 
 enum DocumentCategory {

@@ -6,13 +6,23 @@ interface DiscussionProps {
   question: string;
   userId: string;
 }
-
 export async function GET() {
   try {
     const discussions = await prisma.discussion.findMany({
       include: { user: true, replies: true },
     });
-    return NextResponse.json(discussions, { status: 200 });
+
+    const sanitizedDiscussions = discussions.map((discussion) => {
+      const { user, ...restDiscussion } = discussion;
+      const sanitizedUser = { username: user.username }; // Include only necessary user fields
+      return {
+        ...restDiscussion,
+        user: sanitizedUser,
+        replies: discussion.replies,
+      };
+    });
+
+    return NextResponse.json(sanitizedDiscussions, { status: 200 });
   } catch (error: any) {
     console.error("Error in GET /api/discussions:", error.message, error.stack);
     return NextResponse.json(

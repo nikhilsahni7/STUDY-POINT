@@ -1,4 +1,3 @@
-// app/api/search/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/../../db"; // Ensure prisma client is correctly imported
 
@@ -20,9 +19,12 @@ export async function GET(request: NextRequest) {
         { name: { contains: query, mode: "insensitive" } },
         { description: { contains: query, mode: "insensitive" } },
         { subject: { contains: query, mode: "insensitive" } },
+        { type: { contains: query, mode: "insensitive" } },
       ],
     },
   });
 
-  return NextResponse.json(results);
+  const sanitizedResults = results.map(({ userId, id, ...rest }) => rest);
+
+  return NextResponse.json(sanitizedResults);
 }

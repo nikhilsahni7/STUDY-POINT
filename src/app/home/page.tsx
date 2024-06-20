@@ -24,7 +24,6 @@ const HomePage = async () => {
       </h1>
 
       <Hero />
-
       <Features />
       <Testimonials />
       <Newsletter />

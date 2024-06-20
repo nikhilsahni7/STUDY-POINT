@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/../../db";
 import mime from "mime";
+import { auth } from "../../../../auth";
 
 const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN_NAME;
 
 export async function GET(req: NextRequest) {
   try {
-    const subject = req.nextUrl.searchParams.get("subject"); // Use req.nextUrl.searchParams
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const subject = req.nextUrl.searchParams.get("subject");
 
     if (!subject) {
       return NextResponse.json(
@@ -29,15 +36,25 @@ export async function GET(req: NextRequest) {
     const documentsWithUrls = documents.map((doc) => {
       const url = `https://${cloudFrontDomain}/${doc.key}`;
       const contentType = mime.getType(doc.key);
-      return { ...doc, url, contentType };
+      // Destructure to exclude userId and id from the response
+      const { userId, id, ...safeDoc } = doc;
+      return { ...safeDoc, url, contentType };
     });
 
     return NextResponse.json({ documents: documentsWithUrls });
   } catch (error) {
-    console.error("Error fetching documents by subject", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    if (process.env.NODE_ENV === "production") {
+      console.error("Error fetching documents by subject", error);
+      return NextResponse.json(
+        { error: "Something went wrong" },
+        { status: 500 }
+      );
+    } else {
+      console.error("Detailed Error:", error);
+      return NextResponse.json(
+        { error: "Something went wrong" },
+        { status: 500 }
+      );
+    }
   }
 }

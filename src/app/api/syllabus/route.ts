@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
     const documentsWithUrls = documents.map((doc) => {
       const url = `https://${cloudFrontDomain}/${doc.key}`;
       const contentType = mime.getType(doc.key);
-      return { ...doc, url, contentType };
+      const { userId, id, ...safeDoc } = doc;
+      return { ...safeDoc, url, contentType };
     });
 
     return NextResponse.json({ documents: documentsWithUrls });
