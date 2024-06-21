@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/../../db/index";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const reply = await prisma.reply.findUnique({
-      where: { id: String(id) },
+      where: { id: params.id },
       include: { user: true },
     });
     return NextResponse.json(reply, { status: 200 });
@@ -24,15 +24,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await prisma.reply.delete({
-      where: { id: String(id) },
+      where: { id: params.id },
     });
-
     return NextResponse.json({}, { status: 204 });
   } catch (error: any) {
     console.error(

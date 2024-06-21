@@ -6,14 +6,13 @@ import { auth } from "../../../../auth";
 const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN_NAME;
 
 export async function GET(req: NextRequest) {
+  const subject = req.nextUrl.searchParams.get("subject");
   try {
     const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const subject = req.nextUrl.searchParams.get("subject");
 
     if (!subject) {
       return NextResponse.json(

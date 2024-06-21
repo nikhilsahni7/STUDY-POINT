@@ -1,48 +1,48 @@
-import { useState } from "react";
-import UserIdFetcher from "./UserIdFetcher";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+"use client";
 
-interface ReplyFormProps {
-  discussionId: string;
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { createReply } from "@/lib/api";
+import { useToast } from "./ui/use-toast";
 
 export default function ReplyForm({
-  discussionId: discussionId,
-}: ReplyFormProps) {
+  discussionId,
+  userId,
+}: {
+  discussionId: string;
+  userId: string;
+}) {
   const [answer, setAnswer] = useState("");
-
-  const handleSubmit = async (userId: string) => {
-    const res = await fetch("/api/replies", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answer, userId, discussionId }),
-    });
-    if (res.ok) {
+  const { toast } = useToast();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createReply({ answer, discussionId, userId });
+      toast({
+        title: "Reply posted",
+        description: "Your reply has been posted",
+      });
       setAnswer("");
+
+      // Force a re-render of the ReplyList component
+      window.dispatchEvent(new CustomEvent("replyAdded"));
+    } catch (error) {
+      console.error("Failed to create reply:", error);
     }
   };
 
   return (
-    <UserIdFetcher>
-      {(userId) => (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(userId);
-          }}
-        >
-          <h2>Post a Reply</h2>
-          <div>
-            <label>Answer:</label>
-            <Textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-            />
-          </div>
-          <Button type="submit">Submit</Button>
-        </form>
-      )}
-    </UserIdFetcher>
+    <form onSubmit={handleSubmit} className="mt-6">
+      <Textarea
+        placeholder="Your reply"
+        value={answer}
+        onChange={(e) => setAnswer(e.target.value)}
+        required
+      />
+      <Button type="submit" className="mt-2">
+        Post Reply
+      </Button>
+    </form>
   );
 }

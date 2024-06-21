@@ -23,7 +23,6 @@ import {
 
 import { User, Settings, Menu, User2 } from "lucide-react";
 import { Button } from "./ui/button";
-import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -33,7 +32,7 @@ const Navbar = () => {
       <div className="container mx-auto flex max-w-7xl items-center justify-between p-4">
         <div className="flex items-center space-x-4">
           <Image
-            src="/logo.png"
+            src="/Study-Point.png"
             alt="Logo"
             width={50}
             height={50}

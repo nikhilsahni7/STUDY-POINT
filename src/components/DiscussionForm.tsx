@@ -1,55 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import UserIdFetcher from "./UserIdFetcher";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { createDiscussion } from "@/lib/api";
 
-export default function DiscussionForm() {
+import { useToast } from "./ui/use-toast";
+
+export default function DiscussionForm({ userId }: { userId: string }) {
   const [title, setTitle] = useState("");
   const [question, setQuestion] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = async (userId: string) => {
-    const res = await fetch("/api/discussions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, question, userId }),
-    });
-    if (res.ok) {
-      setTitle("");
-      setQuestion("");
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const newDiscussion = await createDiscussion({ title, question, userId });
+      toast({
+        title: "Discussion Created",
+        description: "Your discussion has been created successfully.",
+      });
+      router.push(`/discussions/${newDiscussion.id}`);
+    } catch (error) {
+      console.error("Failed to create discussion:", error);
     }
   };
 
   return (
-    <UserIdFetcher>
-      {(userId) => (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(userId);
-          }}
-        >
-          <h2>Create a New Discussion</h2>
-          <div>
-            <label>Title:</label>
-            <Input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Question:</label>
-            <Textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-            />
-          </div>
-          <Button type="submit">Submit</Button>
-        </form>
-      )}
-    </UserIdFetcher>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Input
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <Textarea
+        placeholder="Question"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        required
+      />
+      <Button type="submit">Create Discussion</Button>
+    </form>
   );
 }

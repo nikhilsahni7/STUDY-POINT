@@ -8,21 +8,22 @@ import { Newsletter } from "@/components/NewsLetter";
 import { FAQ } from "@/components/Faqs";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { TechStack } from "@/components/TechStack";
-import { UpdateProfile } from "@/components/UpdateProfile";
+import dynamic from "next/dynamic";
+
+// Dynamically import the AnimatedWelcome component with ssr disabled
+const AnimatedWelcome = dynamic(() => import("@/components/AnimationWelcome"), {
+  ssr: false,
+});
 
 const HomePage = async () => {
   const session = await auth();
-
   if (!session?.user && !session) {
     redirect("/");
   }
 
   return (
     <div className="flex flex-col items-center m-4">
-      <h1 className="text-3xl my-2 transition-opacity duration-500 ease-in-out opacity-0 animate-fadeIn ">
-        Welcome, {session?.user?.name}
-      </h1>
-
+      <AnimatedWelcome user={session.user} />
       <Hero />
       <Features />
       <Testimonials />

@@ -5,9 +5,8 @@ import mime from "mime";
 const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN_NAME;
 
 export async function GET(req: NextRequest) {
+  const subject = req.nextUrl.searchParams.get("subject");
   try {
-    const subject = req.nextUrl.searchParams.get("subject"); // Use req.nextUrl.searchParams
-
     if (!subject) {
       return NextResponse.json(
         { error: "Subject is required" },
